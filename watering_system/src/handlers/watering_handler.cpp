@@ -16,9 +16,24 @@ WateringController* WateringHandler::createWateringController(int soilIndex, int
 
 void WateringHandler::begin() {
 	// wateringControllers.push_back(createWateringController(1, 0));
-	wateringControllers.push_back(createWateringController(2, 1));
+	// wateringControllers.push_back(createWateringController(2, 1));
 	// wateringControllers.push_back(createWateringController(4, 2));
 }
+
+void WateringHandler::readConfig(JsonArray& wateringControllerArray) {
+	for (WateringController* w : wateringControllers) {
+		delete w;
+	}
+	wateringControllers.clear();
+
+	for (JsonObject o : wateringControllerArray) {
+		int sensor_index = o["sensor_index"];
+		int motor_index = o["motor_index"];
+		wateringControllers.push_back(
+			createWateringController(sensor_index, motor_index));
+	}
+}
+
 
 void WateringHandler::update() {
 	for (auto& controller : wateringControllers) {

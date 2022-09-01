@@ -29,32 +29,69 @@ SensorHandler::SensorHandler(IOExpander* ioExpander) {
 	_ioExpander = ioExpander;
 }
 
+DHTesp* createIfNotExists(DHTesp* dht) {
+	if (dht == NULL) {
+		dht = new DHTesp();
+		dht->setup(13, DHTesp::DHT22);
+	}
+	return dht;
+}
+
 void SensorHandler::begin() {
-	sensors.push_back(new SoilMoistureSensor(this, 0, 0.15, 0.55, "Chili"));
-	sensors.push_back(new SoilMoistureSensor(this, 1, 0.10, 0.55, "Chili"));
-	sensors.push_back(new SoilMoistureSensor(this, 2, 0.20, 0.55, "Cucumber"));
-	sensors.push_back(new SoilMoistureSensor(this, 3, 0.10, 0.60, "Tomato"));
-	sensors.push_back(new SoilMoistureSensor(this, 4, 0.15, 0.55, "Carolina Reaper"));
-	sensors.push_back(new SoilMoistureSensor(this, 5, 0.10, 0.60, "Cucumber"));
-
-	sensors.push_back(new AmbientLightSensor(this));
-	sensors.push_back(new BarometricSensor(this));
-	sensors.push_back(new TemperatureSensor(this));
-
-	DHTesp* dht = new DHTesp();
-	dht->setup(13, DHTesp::DHT22);
-
-	sensors.push_back(new HumiditySensor(this, dht, 0, 13));
-	sensors.push_back(new DHTTemperatureSensor(this, dht, 0, 13));
-	sensors.push_back(new HeatIndexSensor(this, dht, 0, 13));
-	// DHTesp dht;
-	// sensors.push_back(new TemperatureSensor(this, &dht, 0, 0));
-	// sensors.push_back(new HumiditySensor(this, &dht, 0, 0));
 	_ioExpander->pinMode(IO_ENABLE_PIN, OUTPUT);
 	_ioExpander->pinMode(IO_ADDRESS_PIN_0, OUTPUT);
 	_ioExpander->pinMode(IO_ADDRESS_PIN_1, OUTPUT);
 	_ioExpander->pinMode(IO_ADDRESS_PIN_2, OUTPUT);
 	_ioExpander->digitalWrite(IO_ENABLE_PIN, LOW);
+}
+
+void SensorHandler::readConfig(JsonArray& sensorArray) {
+
+	for (Sensor* s : sensors) {
+		delete s;
+	}
+	sensors.clear();
+
+	DHTesp* dht = NULL;
+
+	for (JsonObject o : sensorArray) {
+		std::string typeStr(o["type"]);
+		SensorType type = sensorTypeMap.at(typeStr);
+		switch (type) {
+			case SOIL_MOISTURE:
+			{
+				int index = o["index"];
+				float minLimit = o["minLimit"];
+				float maxLimit = o["maxLimit"];
+				std::string nameStr(o["name"]); // TODO: Should this be a char pointer?
+				sensors.push_back(new SoilMoistureSensor(this, 
+					index, minLimit, maxLimit, nameStr));
+				break;
+			}
+			case TEMPERATURE:
+				sensors.push_back(new TemperatureSensor(this));
+				break;
+			case DHT_TEMPERATURE:
+				dht = createIfNotExists(dht);
+				sensors.push_back(new DHTTemperatureSensor(this, dht, 0, 13));
+				break;
+			case HUMIDITY:
+				dht = createIfNotExists(dht);
+				sensors.push_back(new HumiditySensor(this, dht, 0, 13));
+				break;
+			case AMBIENT_LIGHT:
+				sensors.push_back(new AmbientLightSensor(this));
+				break;
+			case BAROMETRIC:
+				sensors.push_back(new BarometricSensor(this));
+				break;
+			case HEAT_INDEX:
+				dht = createIfNotExists(dht);
+				sensors.push_back(new HeatIndexSensor(this, dht, 0, 13));
+			break;
+
+		}
+	}
 }
 
 float SensorHandler::getSensorValue(int idx, std::string sensorStr) {
@@ -131,12 +168,18 @@ void SensorHandler::generateConfiguration(JsonArray* json) {
 		std::string name = sensorNameMap.at(sensor->getSensorType());
 		o["index"] = sensor->getIndex();
 		o["type"] = name;
+		if (sensor->getSensorType() == SensorType::SOIL_MOISTURE) {
+			SoilMoistureSensor* sm = ((SoilMoistureSensor*) sensor);
+			o["name"] = sm->getName();
+			o["minLimit"] =	sm->getMinLimit(); 
+			o["maxLimit"] =	sm->getMaxLimit(); 
+		}
 	}
 }
 
 // Sensor
 
-Sensor::Sensor(SensorHandler *sensorHandler, const char* name) {
+Sensor::Sensor(SensorHandler *sensorHandler, std::string name) {
 	_sensorHandler = sensorHandler;
 	metricName = name;
 	gauge = 0;
@@ -144,7 +187,7 @@ Sensor::Sensor(SensorHandler *sensorHandler, const char* name) {
 
 int Sensor::printMetrics(char* buffer) {
 	return sprintf(buffer, "%s_gauge{index=\"%d\"} %.5f\n", 
-		metricName, idx, gauge);
+		metricName.c_str(), idx, gauge);
 }
 
 void IRAM_ATTR Sensor::update() {
@@ -154,7 +197,7 @@ void IRAM_ATTR Sensor::update() {
 // AnalogSensor
 
 AnalogSensor::AnalogSensor(SensorHandler *sensorHandler, 
-	const char* name, int idx) : Sensor(sensorHandler, name) {
+	std::string name, int idx) : Sensor(sensorHandler, name) {
 
 	this->idx = idx;
 }
@@ -162,7 +205,7 @@ AnalogSensor::AnalogSensor(SensorHandler *sensorHandler,
 // DigitalSensor
 
 DigitalSensor::DigitalSensor(SensorHandler *sensorHandler, 
-	const char* name, int idx, int port) : Sensor(sensorHandler, name) {
+	std::string name, int idx, int port) : Sensor(sensorHandler, name) {
 
 	this->idx = idx;
 	multiplexerPort = port;
@@ -171,7 +214,7 @@ DigitalSensor::DigitalSensor(SensorHandler *sensorHandler,
 // I2CSensor
 
 I2CSensor::I2CSensor(SensorHandler *sensorHandler, 
-	const char* name, int idx, int address) : Sensor(sensorHandler, name) {
+	std::string name, int idx, int address) : Sensor(sensorHandler, name) {
 	this->idx = idx;
 	i2cAddress = address;
 }
@@ -179,7 +222,7 @@ I2CSensor::I2CSensor(SensorHandler *sensorHandler,
 // SoilMoistureSensor
 
 SoilMoistureSensor::SoilMoistureSensor(SensorHandler *sensorHandler, int idx, 
-	float minLimit, float maxLimit, const char* plantName) 
+	float minLimit, float maxLimit, std::string plantName) 
 		: AnalogSensor(sensorHandler, "soil_moisture", idx) {
 
 	this->maxLimit = maxLimit;
@@ -189,7 +232,7 @@ SoilMoistureSensor::SoilMoistureSensor(SensorHandler *sensorHandler, int idx,
 
 int SoilMoistureSensor::printMetrics(char* buffer) {
 	return sprintf(buffer, "%s_gauge{index=\"%d\", name=\"%s\"} %.5f\n", 
-		metricName, idx, plantName, gauge);
+		metricName.c_str(), idx, plantName.c_str(), gauge);
 }
 
 
@@ -199,6 +242,18 @@ float SoilMoistureSensor::readValue() {
 	int soilMoisture = analogRead(A0);
 	float rawValue = 1.0 - soilMoisture / 1024.0;
 	return (rawValue - minLimit) / (maxLimit - minLimit);
+}
+
+std::string SoilMoistureSensor::getName() {
+	return plantName;
+}
+
+float SoilMoistureSensor::getMinLimit() {
+	return minLimit;	
+}
+
+float SoilMoistureSensor::getMaxLimit() {
+	return maxLimit;	
 }
 
 // AmbientLightSensor

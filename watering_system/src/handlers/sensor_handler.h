@@ -11,6 +11,7 @@
 #include <string>
 
 #include "../helpers/io_expander.h"
+#include "../helpers/eeprom.h"
 #include "../helpers/logger.h"
 
 
@@ -47,6 +48,7 @@ private:
 public:
 	SensorHandler(IOExpander* ioExpander);
 	void begin();
+	void readConfig(JsonArray& sensorArray);
 	Sensor* getSensor(int idx, SensorType sensorType);
 	Sensor* getSensor(int idx, std::string sensorStr);
 	float getSensorValue(int idx, std::string sensorStr);
@@ -65,11 +67,11 @@ protected:
 	bool enabled = false;
 	int idx;
 	float gauge;
-	const char* metricName;
+	std::string metricName;
 	SensorHandler *_sensorHandler;
 
 public:
-	Sensor(SensorHandler *sensorHandler, const char* name);
+	Sensor(SensorHandler *sensorHandler, std::string name);
 	virtual SensorType getSensorType() = 0;
 	virtual int printMetrics(char* buffer);
 	int getIndex() {return idx;};
@@ -81,7 +83,7 @@ public:
 class AnalogSensor : public Sensor {
 
 public:
-	AnalogSensor(SensorHandler *sensorHandler, const char* name, int idx);
+	AnalogSensor(SensorHandler *sensorHandler, std::string name, int idx);
 };
 
 class DigitalSensor : public Sensor {
@@ -90,7 +92,7 @@ protected:
 	int multiplexerPort;
 
 public:
-	DigitalSensor(SensorHandler *sensorHandler, const char* name, int idx, int port);
+	DigitalSensor(SensorHandler *sensorHandler, std::string name, int idx, int port);
 };
 
 class I2CSensor : public Sensor {
@@ -99,7 +101,7 @@ protected:
 	int i2cAddress;
 
 public:
-	I2CSensor(SensorHandler *sensorHandler, const char* name, int idx, int address);
+	I2CSensor(SensorHandler *sensorHandler, std::string name, int idx, int address);
 };
 
 class SoilMoistureSensor : public AnalogSensor {
@@ -108,14 +110,17 @@ private:
 
 	float maxLimit = 1.0;
 	float minLimit = 0.0;
-	const char* plantName;
+	std::string plantName;
 
 public:
 	SoilMoistureSensor(SensorHandler *sensorHandler, 
-		int idx, float minLimit, float maxLimit, const char* plantName);
+		int idx, float minLimit, float maxLimit, std::string plantName);
 	int printMetrics(char* buffer);
 	virtual SensorType getSensorType() {return SensorType::SOIL_MOISTURE;};
 	virtual float readValue();
+	virtual std::string getName();
+	virtual float getMinLimit();
+	virtual float getMaxLimit();
 };
 
 class AmbientLightSensor : public I2CSensor {

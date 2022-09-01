@@ -21,6 +21,7 @@ private:
 public:
 	WateringHandler(SensorHandler* sensorHandler, MotorHandler* motorHandler);
 	void begin();
+	void readConfig(JsonArray& wateringControllerArray);
 	void update();
 	int printConfiguration(char* buffer);
 	void generateConfiguration(JsonArray* json);

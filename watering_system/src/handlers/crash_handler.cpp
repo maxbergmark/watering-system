@@ -55,17 +55,17 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info,
 	idx += sprintf(&buf2[idx], ">>>stack>>>\n");
 
 	if (rst_info->reason == REASON_SOFT_WDT_RST) {
-			offset = 0x1b0;
+		offset = 0x1b0;
 	} else if (rst_info->reason == REASON_EXCEPTION_RST) {
-			offset = 0x1a0;
+		offset = 0x1a0;
 	} else if (rst_info->reason == REASON_WDT_RST) {
-			offset = 0x10;
+		offset = 0x10;
 	}
 
 	if (stack > cont_stack_start && stack < cont_stack_end) {
-			idx += sprintf(&buf2[idx], "%s", "ctx: cont\n");
+		idx += sprintf(&buf2[idx], "%s", "ctx: cont\n");
 	} else {
-			idx += sprintf(&buf2[idx], "%s", "ctx: sys\n");
+		idx += sprintf(&buf2[idx], "%s", "ctx: sys\n");
 	}
 
 	idx += sprintf(&buf2[idx], "sp: %08x end: %08x offset: %04x\n", 
@@ -73,7 +73,7 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info,
 	idx += getStack(stack, stack_end, &buf2[idx]);
 	idx += sprintf(&buf2[idx], "<<<stack<<<\n");
 
-	eeprom_erase_all();
+	// eeprom_erase_all();
 	eeprom_write_string(0, buf2);
 	EEPROM.commit();
 } 

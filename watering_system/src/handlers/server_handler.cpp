@@ -14,19 +14,21 @@
 ESP8266WebServer server(80);
 
 char logBuffer[5100];
-char responseBuffer[2048];
+char responseBuffer[3000];
 char uriBuffer[256];
 
-DynamicJsonDocument responseJson(2048);
+DynamicJsonDocument responseJson(3000);
 
 
 ServerHandler::ServerHandler(SensorHandler* sensorHandler, 
-		MotorHandler* motorHandler, WateringHandler* wateringHandler) {
+	MotorHandler* motorHandler, WateringHandler* wateringHandler, 
+	ConfigHandler* configHandler) {
 	
 	_sensorHandler = sensorHandler;
 	_wateringHandler = wateringHandler;
-
 	_motorHandler = motorHandler;
+	_configHandler = configHandler;
+
 	_updateManager = new UpdateManager();
 	_metricsHandler = new MetricsHandler(_sensorHandler, _motorHandler);
 }
@@ -177,8 +179,7 @@ void ServerHandler::getActivateMotor() {
 	server.send(200, "application/json", responseBuffer);
 }
 
-void ServerHandler::getConfiguration() {
-
+void ServerHandler::createConfigJson() {
 	responseJson.clear();
 	JsonArray sensorJson = responseJson.createNestedArray("sensors");
 	_sensorHandler->generateConfiguration(&sensorJson);
@@ -188,7 +189,13 @@ void ServerHandler::getConfiguration() {
 
 	JsonArray wateringControllerJson = responseJson
 		.createNestedArray("watering_controllers");
-	_wateringHandler->generateConfiguration(&wateringControllerJson);
+	_wateringHandler->generateConfiguration(&wateringControllerJson);	
+}
+
+void ServerHandler::getConfiguration() {
+	makeUri(uriBuffer);
+	Logger::log(uriBuffer);
+	createConfigJson();
 
 	serializeJson(responseJson, responseBuffer);
 	server.send(200, "application/json", responseBuffer);
@@ -196,6 +203,11 @@ void ServerHandler::getConfiguration() {
 
 void ServerHandler::postConfiguration() {
 	responseJson.clear();
+	deserializeJson(responseJson, server.arg("plain"));
+	eeprom_write_string(2048, responseBuffer);
+	EEPROM.commit();
+	_configHandler->createFromJson(responseJson);
+	createConfigJson();
 	serializeJson(responseJson, responseBuffer);
 	server.send(200, "application/json", responseBuffer);
 }

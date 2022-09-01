@@ -1,11 +1,12 @@
 #include <Wire.h>
 #include <Esp.h>
 
+#include "src/handlers/config_handler.h"
 #include "src/handlers/motor_handler.h"
 #include "src/handlers/sensor_handler.h"
-#include "src/helpers/helper_functions.h"
 #include "src/handlers/server_handler.h"
 #include "src/handlers/watering_handler.h"
+#include "src/helpers/helper_functions.h"
 #include "src/handlers/time_handler.h"
 #include "src/helpers/logger.h"
 #include "src/handlers/crash_handler.h"
@@ -19,14 +20,13 @@
 #define timer0_preload 40161290*4
 #define loop_delay 1
 
-
-
 PCFExpander ioExpander;
 MotorHandler motorHandler(&ioExpander);
 SensorHandler sensorHandler(&ioExpander);
 WateringHandler wateringHandler(&sensorHandler, &motorHandler);
+ConfigHandler configHandler(&sensorHandler, &motorHandler, &wateringHandler);
 ServerHandler serverHandler(&sensorHandler, 
-	&motorHandler, &wateringHandler);
+	&motorHandler, &wateringHandler, &configHandler);
 
 void IRAM_ATTR updateHandlers() {
 	motorHandler.update();
@@ -41,7 +41,6 @@ void setupIOExpander() {
 		Logger::log("Error setting up IO expander.");
 		delay(1000);
 		ESP.restart();
-
 	}
 }
 
@@ -58,6 +57,7 @@ void setupHandlers() {
 	serverHandler.setupServer();
 	motorHandler.begin();
 	wateringHandler.begin();
+	configHandler.begin();
 	serverHandler.begin();
 	TimeHandler::begin();
 }

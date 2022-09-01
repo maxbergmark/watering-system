@@ -23,8 +23,9 @@ private:
 	std::vector<Motor*> motors;
 
 public:
-	MotorHandler(IOExpander* IOExpander);
+	MotorHandler(IOExpander* ioExpander);
 	void begin();
+	void readConfig(JsonArray& motorArray);
 	void update();
 	String getMetricsString();
 	int printMetrics(char* buffer);
@@ -62,5 +63,6 @@ public:
 	bool getState();
 	MotorHandler* getMotorHandler();
 	int getActivations();
+	void setActivations(int value);
 	int getMotorPin();
 };

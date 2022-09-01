@@ -5,12 +5,27 @@ MotorHandler::MotorHandler(IOExpander* ioExpander) {
 }
 
 void MotorHandler::begin() {
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_0));
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_1));
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_2));
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_3));
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_4));
-	motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_5));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_0));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_1));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_2));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_3));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_4));
+	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_5));
+}
+
+void MotorHandler::readConfig(JsonArray& motorArray) {
+	for (Motor* m : motors) {
+		delete m;
+	}
+	motors.clear();
+
+	for (JsonObject o : motorArray) {
+		int motor_index = o["index"];
+		int activations = o["activations"];
+		Motor* m = new Motor(this, _ioExpander, motor_index);
+		m->setActivations(activations);
+		motors.push_back(m);
+	}	
 }
 
 void IRAM_ATTR MotorHandler::update() {
@@ -165,6 +180,10 @@ MotorHandler* Motor::getMotorHandler() {
 
 int Motor::getActivations() {
 	return count;
+}
+
+void Motor::setActivations(int value) {
+	count = value;
 }
 
 int Motor::getMotorPin() {
