@@ -1,0 +1,94 @@
+{
+    "sensors": [
+        {
+            "index": 0,
+            "type": "soil_moisture",
+            "name": "Chili",
+            "minLimit": 0.15,
+            "maxLimit": 1.55
+        },
+        {
+            "index": 1,
+            "type": "soil_moisture",
+            "name": "Chili",
+            "minLimit": 0.1,
+            "maxLimit": 0.55
+        },
+        {
+            "index": 2,
+            "type": "soil_moisture",
+            "name": "Cucumber",
+            "minLimit": 0.2,
+            "maxLimit": 0.55
+        },
+        {
+            "index": 3,
+            "type": "soil_moisture",
+            "name": "Tomato",
+            "minLimit": 0.1,
+            "maxLimit": 0.6
+        },
+        {
+            "index": 4,
+            "type": "soil_moisture",
+            "name": "Carolina Reaper",
+            "minLimit": 0.15,
+            "maxLimit": 0.55
+        },
+        {
+            "index": 5,
+            "type": "soil_moisture",
+            "name": "Cucumber",
+            "minLimit": 0.1,
+            "maxLimit": 0.6
+        },
+        {
+            "index": 0,
+            "type": "ambient_light"
+        },
+        {
+            "index": 0,
+            "type": "barometric"
+        },
+        {
+            "index": 0,
+            "type": "temperature"
+        },
+        {
+            "index": 0,
+            "type": "humidity"
+        },
+        {
+            "index": 0,
+            "type": "dht_temperature"
+        },
+        {
+            "index": 0,
+            "type": "heat_index"
+        }
+    ],
+    "motors": [
+        {
+            "index": 0,
+            "type": "motor",
+            "activations": 2
+        },
+        {
+            "index": 1,
+            "type": "motor",
+            "activations": 3
+        },
+        {
+            "index": 2,
+            "type": "motor",
+            "activations": 4
+        }
+    ],
+    "watering_controllers": [
+        {
+            "sensor_index": 2,
+            "motor_index": 1,
+            "type": "watering_controller"
+        }
+    ]
+}
