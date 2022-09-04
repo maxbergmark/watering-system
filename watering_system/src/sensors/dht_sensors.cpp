@@ -8,7 +8,6 @@ HumiditySensor::HumiditySensor(SensorHandler *sensorHandler, DHTesp* dht,
 };
 
 float HumiditySensor::readValue() {
-	// return 0;
 	return dht->getHumidity();
 }
 
@@ -21,7 +20,6 @@ DHTTemperatureSensor::DHTTemperatureSensor(SensorHandler *sensorHandler, DHTesp*
 };
 
 float DHTTemperatureSensor::readValue() {
-	// return 0;
 	return dht->getTemperature();
 }
 
@@ -33,7 +31,6 @@ HeatIndexSensor::HeatIndexSensor(SensorHandler *sensorHandler, DHTesp* dht,
 };
 
 float HeatIndexSensor::readValue() {
-	// return 0;
 	float temp = dht->getTemperature();
 	float hum = dht->getHumidity();
 	return dht->computeHeatIndex(temp, hum, false);

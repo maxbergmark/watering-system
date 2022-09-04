@@ -2,9 +2,8 @@
 
 #include <DHTesp.h>
 
-// #include "../handlers/sensor_handler.h"
 #include "base_sensors.h"
-// class DigitalSensor;
+#include "sensor_type.h"
 
 class HumiditySensor : public DigitalSensor {
 

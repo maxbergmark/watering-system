@@ -19,9 +19,6 @@ WateringController* WateringHandler::createWateringController(int soilIndex, int
 }
 
 void WateringHandler::begin() {
-	// wateringControllers.push_back(createWateringController(1, 0));
-	// wateringControllers.push_back(createWateringController(2, 1));
-	// wateringControllers.push_back(createWateringController(4, 2));
 }
 
 void WateringHandler::readConfig(JsonArray& wateringControllerArray) {

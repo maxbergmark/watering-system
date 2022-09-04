@@ -5,7 +5,6 @@ MetricsHandler::MetricsHandler(SensorHandler *sensorHandler,
 
 	_sensorHandler = sensorHandler;
 	_motorHandler = motorHandler;
-
 }
 
 int MetricsHandler::printMetrics(char* buffer) {

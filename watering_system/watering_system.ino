@@ -18,9 +18,6 @@
 #error Select ESP8266 board.
 #endif
 
-#define timer0_preload 40161290*4
-#define loop_delay 1
-
 PCFExpander ioExpander;
 MotorHandler motorHandler(&ioExpander);
 SensorHandler sensorHandler(&ioExpander);
@@ -43,7 +40,6 @@ void updateHandlers() {
 	motorHandler.update();
 	wateringHandler.update();
 	TimeHandler::update();
-	// timer0_write(ESP.getCycleCount() + timer0_preload * loop_delay);
 }
 
 void updateServer() {
@@ -66,14 +62,6 @@ void setupIOExpander() {
 	}
 }
 
-void setupHandlerLoop() {
-	noInterrupts();
-	timer0_isr_init();
-	timer0_attachInterrupt(updateHandlers);
-	timer0_write(ESP.getCycleCount() + timer0_preload * loop_delay);
-	interrupts();
-}
-
 void setupHandlers() {
 	sensorHandler.begin();
 	serverHandler.setupServer();
@@ -87,7 +75,7 @@ void setupHandlers() {
 void logResetReason() {
 	rst_info* ri = system_get_rst_info();
 	Logger::log(ESP.getResetReason());
-	Logger::log(String(ri->reason));
+	// Logger::log(String(ri->reason));
 	// Logger::log(String(ri->exccause));
 	// Logger::log(String(ri->epc1));
 	// Logger::log(String(ri->epc2));
@@ -101,10 +89,9 @@ void setup() {
 	EEPROM.begin(EEPROM_MAX_ADDR);
 	Serial.begin(115200);
 	while (!Serial);
-	// i2cScan();
+
 	setupIOExpander();
 	setupHandlers();
-	// setupHandlerLoop();
 	logResetReason();
 
 	runner.init();

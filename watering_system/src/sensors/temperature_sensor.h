@@ -2,10 +2,8 @@
 
 #include <Adafruit_BMP085.h>
 
-// #include "../handlers/sensor_handler.h"
 #include "base_sensors.h"
-// class I2CSensor;
-
+#include "sensor_type.h"
 
 class TemperatureSensor : public I2CSensor {
 

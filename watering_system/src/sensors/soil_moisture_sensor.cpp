@@ -2,9 +2,6 @@
 
 #include "../handlers/sensor_handler.h"
 
-
-// SoilMoistureSensor
-
 SoilMoistureSensor::SoilMoistureSensor(SensorHandler *sensorHandler, int idx, 
 	float minLimit, float maxLimit, std::string plantName) 
 		: AnalogSensor(sensorHandler, "soil_moisture", idx) {

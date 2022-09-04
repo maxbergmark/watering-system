@@ -1,6 +1,5 @@
 #include "logger.h"
 
-
 std::vector<char*> makeVector() {
 	std::vector<char*> v;
 	for (int i = 0; i < NUM_LOG_ROWS; i++) {
