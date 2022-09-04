@@ -1,5 +1,9 @@
 #include "watering_handler.h"
 
+#include "../sensors/soil_moisture_sensor.h"
+#include "../sensors/sensor_type.h"
+#include "sensor_handler.h"
+
 WateringHandler::WateringHandler(SensorHandler* sensorHandler, MotorHandler* motorHandler) {
 	_sensorHandler = sensorHandler;
 	_motorHandler = motorHandler;

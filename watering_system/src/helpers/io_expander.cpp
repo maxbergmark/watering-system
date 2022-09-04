@@ -15,7 +15,7 @@ void MCPExpander::pinMode(int pin, bool mode) {
 	mcp.pinMode(pin, mode);
 }
 
-void IRAM_ATTR MCPExpander::digitalWrite(int pin, bool state) {
+void MCPExpander::digitalWrite(int pin, bool state) {
 	mcp.digitalWrite(pin, state);
 }
 
@@ -36,7 +36,7 @@ void PCFExpander::pinMode(__attribute__((unused)) int pin, __attribute__((unused
 	// Logger::log(str);
 }
 
-void IRAM_ATTR PCFExpander::digitalWrite(int pin, bool state) {
+void PCFExpander::digitalWrite(int pin, bool state) {
 	pcf.write(pin, state);
 	// char s[50];
 	// sprintf(s, "Writing %d to %d", state, pin);

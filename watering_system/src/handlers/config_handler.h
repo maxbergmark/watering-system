@@ -18,4 +18,5 @@ public:
 		MotorHandler* motorHandler, WateringHandler* wateringHandler);
 	void begin();
 	void createFromJson(DynamicJsonDocument& json);
+	void saveConfig();
 };

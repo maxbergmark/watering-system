@@ -14,10 +14,10 @@
 ESP8266WebServer server(80);
 
 char logBuffer[5100];
-char responseBuffer[3000];
+char responseBuffer[2048];
 char uriBuffer[256];
 
-DynamicJsonDocument responseJson(3000);
+DynamicJsonDocument responseJson(2048);
 
 
 ServerHandler::ServerHandler(SensorHandler* sensorHandler, 
@@ -204,6 +204,7 @@ void ServerHandler::getConfiguration() {
 void ServerHandler::postConfiguration() {
 	responseJson.clear();
 	deserializeJson(responseJson, server.arg("plain"));
+	serializeJson(responseJson, responseBuffer);
 	eeprom_write_string(2048, responseBuffer);
 	EEPROM.commit();
 	_configHandler->createFromJson(responseJson);

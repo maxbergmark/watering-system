@@ -3,11 +3,13 @@
 #include <vector>
 #include <ArduinoJson.h>
 
-#include "sensor_handler.h"
+// #include "sensor_handler.h"
 #include "motor_handler.h"
 #include "time_handler.h"
 
 class WateringController;
+class SoilMoistureSensor;
+class SensorHandler;
 
 class WateringHandler {
 

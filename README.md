@@ -1,5 +1,10 @@
 # Watering System
 
+This is a repository for all code related to the ESP8266 based watering system, which has support for multiple sensor types, pumps, and automatic watering. 
+
+<p align="center">
+    <img src="/watering_system_chip.png" width="80%" />
+</p>
 
 ## Setup
 
@@ -13,6 +18,7 @@
 - DHT sensor library for ESPx
 - [Adafruit BMP085 Library](https://github.com/adafruit/Adafruit-BMP085-Library)
 - [base64](https://github.com/Densaugeo/base64_arduino)
+- [TaskScheduler](https://github.com/arkhipenko/TaskScheduler)
 
 ### WiFi connection
 
@@ -55,7 +61,9 @@ Soil moisture sensors also include the following fields:
 - `minLimit`: The soil moisture reading that should correspond to 0% soil moisture
 - `maxLimit`: The soil moisture reading that should correspond to 100% soil moisture
 
-`minLimit` and `maxLimit` are needed to calibrate individual soil moisture sensors. In the future, they might be dynamically calculated, but for now they are manually entered. 
+`minLimit` and `maxLimit` are needed to calibrate individual soil moisture sensors. In the future, they might be dynamically calculated, but for now they are manually entered.
+
+For soil moisture sensors, the `index` field also specifies which analog port the sensor is connected to, with index 0 corresponding to the top connector on the left side of the watering system chip. 
 
 ##### Motors
 

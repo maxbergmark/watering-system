@@ -2,6 +2,12 @@
 
 #include <string>
 
+#include "../sensors/soil_moisture_sensor.h"
+#include "../sensors/ambient_light_sensor.h"
+#include "../sensors/barometric_sensor.h"
+#include "../sensors/temperature_sensor.h"
+#include "../sensors/dht_sensors.h"
+
 // SensorHandler
 
 std::unordered_map<std::string, SensorType> SensorHandler::sensorTypeMap = {
@@ -139,7 +145,7 @@ int SensorHandler::printMetrics(char* buffer) {
 	return idx;
 }
 
-void IRAM_ATTR SensorHandler::update() {
+void SensorHandler::update() {
 	for (auto &sensor : sensors) {
 		sensor->update();
 	}
@@ -177,183 +183,10 @@ void SensorHandler::generateConfiguration(JsonArray* json) {
 	}
 }
 
-// Sensor
-
-Sensor::Sensor(SensorHandler *sensorHandler, std::string name) {
-	_sensorHandler = sensorHandler;
-	metricName = name;
-	gauge = 0;
-}
-
-int Sensor::printMetrics(char* buffer) {
-	return sprintf(buffer, "%s_gauge{index=\"%d\"} %.5f\n", 
-		metricName.c_str(), idx, gauge);
-}
-
-void IRAM_ATTR Sensor::update() {
-	gauge = readValue();
-}
-
-// AnalogSensor
-
-AnalogSensor::AnalogSensor(SensorHandler *sensorHandler, 
-	std::string name, int idx) : Sensor(sensorHandler, name) {
-
-	this->idx = idx;
-}
-
-// DigitalSensor
-
-DigitalSensor::DigitalSensor(SensorHandler *sensorHandler, 
-	std::string name, int idx, int port) : Sensor(sensorHandler, name) {
-
-	this->idx = idx;
-	multiplexerPort = port;
-}
-
-// I2CSensor
-
-I2CSensor::I2CSensor(SensorHandler *sensorHandler, 
-	std::string name, int idx, int address) : Sensor(sensorHandler, name) {
-	this->idx = idx;
-	i2cAddress = address;
-}
-
-// SoilMoistureSensor
-
-SoilMoistureSensor::SoilMoistureSensor(SensorHandler *sensorHandler, int idx, 
-	float minLimit, float maxLimit, std::string plantName) 
-		: AnalogSensor(sensorHandler, "soil_moisture", idx) {
-
-	this->maxLimit = maxLimit;
-	this->minLimit = minLimit;
-	this->plantName = plantName;
-};
-
-int SoilMoistureSensor::printMetrics(char* buffer) {
-	return sprintf(buffer, "%s_gauge{index=\"%d\", name=\"%s\"} %.5f\n", 
-		metricName.c_str(), idx, plantName.c_str(), gauge);
-}
 
 
 
-float SoilMoistureSensor::readValue() {
-	_sensorHandler->switchActiveSensor(idx);
-	int soilMoisture = analogRead(A0);
-	float rawValue = 1.0 - soilMoisture / 1024.0;
-	return (rawValue - minLimit) / (maxLimit - minLimit);
-}
-
-std::string SoilMoistureSensor::getName() {
-	return plantName;
-}
-
-float SoilMoistureSensor::getMinLimit() {
-	return minLimit;	
-}
-
-float SoilMoistureSensor::getMaxLimit() {
-	return maxLimit;	
-}
-
-// AmbientLightSensor
-
-AmbientLightSensor::AmbientLightSensor(SensorHandler *sensorHandler) 
-		: I2CSensor(sensorHandler, "ambient_light", 0, 0x4A) {
-	
-	if(light.begin()) {
-		Logger::log("Could not find a valid MAX44009 sensor, check wiring!");
-		// delay(1000);
-		// ESP.restart();
-	} else {
-		enabled = true;
-	}
-}
-
-float AmbientLightSensor::readValue() {
-	if (enabled) {
-		return light.get_lux();
-	}
-	return 0;
-}
-
-// BarometricSensor
-
-BarometricSensor::BarometricSensor(SensorHandler *sensorHandler) 
-		: I2CSensor(sensorHandler, "barometric", 0, 0x00) {
-	
-	if(!barometer.begin()) {
-		Logger::log("Could not find a valid BMP085 sensor, check wiring!");
-		// delay(1000);
-		// ESP.restart();
-	} else {
-		enabled = true;
-	}
-}
-
-float BarometricSensor::readValue() {
-	if (enabled) {
-		return barometer.readPressure();
-	}
-	return 0;
-}
-
-// TemperatureSensor
-
-TemperatureSensor::TemperatureSensor(SensorHandler *sensorHandler) 
-	: I2CSensor(sensorHandler, "temperature", 0, 0x00) {
-
-	if(!barometer.begin()) {
-		Logger::log("Could not find a valid BMP085 sensor, check wiring!");
-		// delay(1000);
-		// ESP.restart();
-	} else {
-		enabled = true;
-	}
-}
-
-float TemperatureSensor::readValue() {
-	if (enabled) {
-		return barometer.readTemperature();
-	}
-	return 0;
-}
-
-// HumiditySensor
-
-HumiditySensor::HumiditySensor(SensorHandler *sensorHandler, DHTesp* dht,
-	int idx, int port) : DigitalSensor(sensorHandler, "humidity", idx, port) {
-	this->dht = dht;
-};
-
-float HumiditySensor::readValue() {
-	// return 0;
-	return dht->getHumidity();
-}
 
 
-// DHTTemperatureSensor
 
-DHTTemperatureSensor::DHTTemperatureSensor(SensorHandler *sensorHandler, DHTesp* dht,
-	int idx, int port) : DigitalSensor(sensorHandler, "dht_temperature", idx, port) {
-	this->dht = dht;
-};
 
-float DHTTemperatureSensor::readValue() {
-	// return 0;
-	return dht->getTemperature();
-}
-
-// HeatIndexSensor
-
-HeatIndexSensor::HeatIndexSensor(SensorHandler *sensorHandler, DHTesp* dht,
-	int idx, int port) : DigitalSensor(sensorHandler, "heat_index", idx, port) {
-	this->dht = dht;
-};
-
-float HeatIndexSensor::readValue() {
-	// return 0;
-	float temp = dht->getTemperature();
-	float hum = dht->getHumidity();
-	return dht->computeHeatIndex(temp, hum, false);
-}

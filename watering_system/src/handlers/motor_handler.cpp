@@ -5,12 +5,6 @@ MotorHandler::MotorHandler(IOExpander* ioExpander) {
 }
 
 void MotorHandler::begin() {
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_0));
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_1));
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_2));
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_3));
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_4));
-	// motors.push_back(new Motor(this, _ioExpander, MOTOR_PIN_5));
 }
 
 void MotorHandler::readConfig(JsonArray& motorArray) {
@@ -28,7 +22,7 @@ void MotorHandler::readConfig(JsonArray& motorArray) {
 	}	
 }
 
-void IRAM_ATTR MotorHandler::update() {
+void MotorHandler::update() {
 	for (auto &motor : motors) {
 		motor->update();
 	}
@@ -120,7 +114,7 @@ Motor::Motor(MotorHandler* motorHandler, IOExpander* ioExpander, int pin) {
 	turnOff();
 }
 
-void IRAM_ATTR Motor::update() {
+void Motor::update() {
 	unsigned long current = millis();
 	if ((current > stopTime && state == HIGH) || current < startTime) {
 		turnOff();
@@ -154,7 +148,7 @@ void Motor::turnOn() {
 	count++;
 }
 
-void IRAM_ATTR Motor::turnOff() {
+void Motor::turnOff() {
 	state = LOW;
 	Logger::log("turning off motor");
 	_ioExpander->digitalWrite(motorPin, state);
