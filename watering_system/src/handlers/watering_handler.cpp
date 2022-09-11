@@ -26,6 +26,7 @@ void WateringHandler::readConfig(JsonArray& wateringControllerArray) {
 		delete w;
 	}
 	wateringControllers.clear();
+	return;
 
 	for (JsonObject o : wateringControllerArray) {
 		int sensor_index = o["sensor_index"];

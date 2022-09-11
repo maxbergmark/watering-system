@@ -17,6 +17,7 @@ int MetricsHandler::printMetrics(char* buffer) {
 	idx += sprintf(&buffer[idx], 
 		"esp_max_free_block_size %d\n", ESP.getMaxFreeBlockSize());
 	idx += sprintf(&buffer[idx], "esp_uptime %lu\n", millis());
+
 	return idx;
 }
 

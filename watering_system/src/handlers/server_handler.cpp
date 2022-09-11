@@ -13,7 +13,7 @@
 
 ESP8266WebServer server(80);
 
-char logBuffer[5100];
+char* logBuffer;
 char responseBuffer[2048];
 char uriBuffer[256];
 
@@ -137,8 +137,10 @@ void ServerHandler::getReset() {
 void ServerHandler::getLogs() {
 	makeUri(uriBuffer);
 	Logger::log(uriBuffer);
-	Logger::print(logBuffer, 1024);
+	logBuffer = (char*) malloc(5000*sizeof(char));
+	Logger::print(logBuffer, 5000);
 	server.send(200, "text/plain", logBuffer);
+	free(logBuffer);
 }
 
 void ServerHandler::getActivateMotor() {

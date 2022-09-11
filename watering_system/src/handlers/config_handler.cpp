@@ -2,8 +2,7 @@
 
 #include "../helpers/logger.h"
 
-char confBuffer[2048];
-DynamicJsonDocument json(2048);
+char* confBuffer;
 
 ConfigHandler::ConfigHandler(SensorHandler* sensorHandler, 
 	MotorHandler* motorHandler, WateringHandler* wateringHandler) {
@@ -13,9 +12,12 @@ ConfigHandler::ConfigHandler(SensorHandler* sensorHandler,
 }
 
 void ConfigHandler::begin() {
+	confBuffer = (char*) malloc(2048 * sizeof(char));
+	DynamicJsonDocument json(2048);
 	eeprom_read_string(2048, confBuffer, 2048);
 	deserializeJson(json, confBuffer);
 	createFromJson(json);
+	free(confBuffer);
 }
 
 void ConfigHandler::createFromJson(DynamicJsonDocument& json) {
@@ -31,6 +33,8 @@ void ConfigHandler::createFromJson(DynamicJsonDocument& json) {
 }
 
 void ConfigHandler::saveConfig() {
+	confBuffer = (char*) malloc(2048 * sizeof(char));
+	DynamicJsonDocument json(2048);
 	json.clear();
 
 	JsonArray sensorJson = json.createNestedArray("sensors");
@@ -43,7 +47,8 @@ void ConfigHandler::saveConfig() {
 		.createNestedArray("watering_controllers");
 	_wateringHandler->generateConfiguration(&wateringControllerJson);
 
-	serializeJson(json, confBuffer);
+	serializeJson(json, confBuffer, 2048);
 	eeprom_write_string(2048, confBuffer);
 	EEPROM.commit();
+	free(confBuffer);
 }
