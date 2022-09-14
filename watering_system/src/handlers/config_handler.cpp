@@ -24,11 +24,11 @@ void ConfigHandler::createFromJson(DynamicJsonDocument& json) {
 	JsonArray sensors = json["sensors"].as<JsonArray>();
 	JsonArray motors = json["motors"].as<JsonArray>();
 	JsonArray wateringControllers = json["watering_controllers"].as<JsonArray>();
-	Logger::log("updating sensors");
+	Logger::log("creating sensors");
 	_sensorHandler->readConfig(sensors);
-	Logger::log("updating motors");
+	Logger::log("creating motors");
 	_motorHandler->readConfig(motors);
-	Logger::log("updating watering controllers");
+	Logger::log("creating watering controllers");
 	_wateringHandler->readConfig(wateringControllers);
 }
 

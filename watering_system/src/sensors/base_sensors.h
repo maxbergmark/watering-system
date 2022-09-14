@@ -21,7 +21,7 @@ public:
 	virtual int printMetrics(char* buffer);
 	int getIndex() {return idx;};
 	virtual float readValue() = 0;
-	void update();
+	virtual void update();
 };
 
 

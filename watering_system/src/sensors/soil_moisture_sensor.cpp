@@ -15,7 +15,7 @@ int SoilMoistureSensor::printMetrics(char* buffer) {
 	int n = sprintf(buffer, "%s_gauge{index=\"%d\", name=\"%s\", type=\"normalized\"} %.5f\n", 
 		metricName.c_str(), idx, plantName.c_str(), gauge);
 	n += sprintf(&buffer[n], "%s_gauge{index=\"%d\", name=\"%s\", type=\"raw\"} %.5f\n", 
-		metricName.c_str(), idx, plantName.c_str(), gauge);
+		metricName.c_str(), idx, plantName.c_str(), rawGauge);
 	return n;
 }
 
@@ -30,6 +30,11 @@ float SoilMoistureSensor::readValue() {
 	maxLimit = max(maxLimit, rawValue);
 	minLimit = min(minLimit, rawValue);
 	return (rawValue - minLimit) / max(0.001f, maxLimit - minLimit);
+}
+
+void SoilMoistureSensor::update() {
+	rawGauge = getRawValue();
+	gauge = readValue();
 }
 
 std::string SoilMoistureSensor::getName() {

@@ -9,6 +9,7 @@ private:
 	float maxLimit = 1.0;
 	float minLimit = 0.0;
 	std::string plantName;
+	float rawGauge;
 
 	virtual float getRawValue();
 
@@ -21,4 +22,5 @@ public:
 	virtual std::string getName();
 	virtual float getMinLimit();
 	virtual float getMaxLimit();
+	void update() override;
 };

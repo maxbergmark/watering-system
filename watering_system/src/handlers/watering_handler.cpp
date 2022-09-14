@@ -26,7 +26,6 @@ void WateringHandler::readConfig(JsonArray& wateringControllerArray) {
 		delete w;
 	}
 	wateringControllers.clear();
-	return;
 
 	for (JsonObject o : wateringControllerArray) {
 		int sensor_index = o["sensor_index"];
@@ -98,7 +97,7 @@ void WateringController::update() {
 	bool isDay = 8 <= h && h < 20;
 	bool isOtherMotorActive = motor->getMotorHandler()->isAnyMotorActive();
 
-	if (t > DELAY_TIME &&  isDry && isDay) {		
+	if (t > DELAY_TIME && isDry && isDay) {
 		consecutiveMeasurements++;
 		bool enoughMeasurements = consecutiveMeasurements >= REQUIRED_MEASUREMENTS;
 		if (!isOtherMotorActive && enoughMeasurements) {
